@@ -48,10 +48,10 @@ function mount_virtiofs_or_virtfs_share() {
 
 
 echo "1. Updating OS"
-sudo apt update && sudo apt full-upgrade -y >/dev/null
+DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y >/dev/null
 
 echo "2. Installing essential tools"
-sudo apt install git curl wget grep sed gnupg gpg bindfs build-essential nano micro -y >/dev/null
+DEBIAN_FRONTEND=noninteractive sudo apt install git curl wget grep sed gnupg gpg bindfs build-essential nano micro -y >/dev/null
 
 echo "3. Mounting share (if provided)"
 FSTAB_LINES=$(mount_virtiofs_or_virtfs_share share /mnt/share "/mnt/share/$USER")
@@ -59,5 +59,5 @@ if [ ! -z "$FSTAB_LINES" ] && ! file_contains_lines /etc/fstab "$FSTAB_LINES"; t
   echo "$FSTAB_LINES" | sudo tee -a /etc/fstab >/dev/null
 fi
 
-echo "4. Install ZSH"
-sudo apt install zsh -y
+echo "4. Installing ZSH"
+DEBIAN_FRONTEND=noninteractive sudo apt install zsh -y
