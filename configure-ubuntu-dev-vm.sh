@@ -15,7 +15,7 @@ function mount_virtiofs_share() {
   local SHARE="$1"
   local MOUNT_PATH="$2"
   sudo mkdir -p "$MOUNT_PATH" && \
-  sudo mount -t virtiofs "$SHARE" "$MOUNT_PATH" >/dev/null 2>1 && \
+  sudo mount -t virtiofs "$SHARE" "$MOUNT_PATH" >/dev/null 2>&1 && \
   cat <<END
 $SHARE	$MOUNT_PATH	virtiofs	rw,nofail	0	0
 END
@@ -30,7 +30,7 @@ function mount_virtfs_share() {
   local MOUNT_PATH="$2"
   local MAPPING="$(stat -c '%u' "$MOUNT_PATH")/$(stat -c '%u' "$HOME"):@$(stat -c '%g' "$MOUNT_PATH")/@$(stat -c '%g' "$HOME")"
   sudo mkdir -p "$MOUNT_PATH" && \
-  sudo mount -t 9p -o trans=virtio "$SHARE" "$MOUNT_PATH" -oversion=9p2000.L >/dev/null 2>1 && \
+  sudo mount -t 9p -o trans=virtio "$SHARE" "$MOUNT_PATH" -oversion=9p2000.L >/dev/null 2>&1 && \
   sudo bindfs "--map=$MAPPING" "$MOUNT_PATH" "$MOUNT_PATH" && \
   cat <<END
 $SHARE	$MOUNT_PATH	9p	trans=virtio,version=9p2000.L,rw,_netdev,nofail	0	0
