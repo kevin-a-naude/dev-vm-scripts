@@ -68,10 +68,10 @@ function mount_virtiofs_or_virtfs_share() {
 
 
 echo "1. Updating OS"
-DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y >/dev/null
+DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y
 
 echo "2. Installing essential tools"
-DEBIAN_FRONTEND=noninteractive sudo apt install git curl wget grep sed gnupg gpg bindfs build-essential cargo nano micro apt-utils -y >/dev/null
+DEBIAN_FRONTEND=noninteractive sudo apt-get install git curl wget grep sed gnupg gpg bindfs build-essential cargo nano micro apt-utils -y
 
 echo "3. Mounting share (if provided)"
 FSTAB_LINES=$(mount_virtiofs_or_virtfs_share share /mnt/share "/mnt/share/$USER")
@@ -80,7 +80,7 @@ if [ ! -z "$FSTAB_LINES" ] && ! file_contains_lines /etc/fstab "$FSTAB_LINES"; t
 fi
 
 echo "4. Installing ZSH"
-DEBIAN_FRONTEND=noninteractive sudo apt install zsh -y
+DEBIAN_FRONTEND=noninteractive sudo apt-get install zsh -y
 
 echo "5. Setting up .config and .local"
 ZDOTDIR="$HOME/.config/zsh"
