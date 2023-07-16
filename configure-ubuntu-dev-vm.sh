@@ -1,11 +1,30 @@
 #!/bin/bash
 
-function is_mounted() { # is_mounted <path>
+# is_mounted <path>
+function is_mounted() {
   [[ ! -z $(mount | grep "\\s$1\\s") ]] && true
 }
 
-function file_contains_lines() { # file_contains_lines <file-path> <lines>
+# file_contains_lines <file-path> <lines>
+function file_contains_lines() {
   [[ ! -z $(grep -Pzl "${2//\n/\\n}" "$1") ]] && true
+}
+
+# move_and_link_dotted_files <config-dir> <file-name>...
+# Moves ".<file-name>" to <config-dir>/<file-name> and creates a symbolic link
+# from <config-dir>/.<file-name> to <config-dir>/<file-name>, if ".<file-name>"
+# exists.
+function move_and_link_dotted_files() {
+  local CONFIG_DIR="$1"
+  mkdir -p "$CONFIG_DIR"
+  shift
+  while [ $# -gt 0 ]; do
+    if [ -e ".$1" ]; then
+      mv ".$1" "$CONFIG_DIR/$2"
+      ln -rs "$CONFIG_DIR/$2" "$CONFIG_DIR/.$2"
+    fi
+    shift
+  done
 }
 
 # mount_virtiofs <share-name> <mount-path>
@@ -52,7 +71,7 @@ echo "1. Updating OS"
 DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y >/dev/null
 
 echo "2. Installing essential tools"
-DEBIAN_FRONTEND=noninteractive sudo apt install git curl wget grep sed gnupg gpg bindfs build-essential nano micro apt-utils -y >/dev/null
+DEBIAN_FRONTEND=noninteractive sudo apt install git curl wget grep sed gnupg gpg bindfs build-essential cargo nano micro apt-utils -y >/dev/null
 
 echo "3. Mounting share (if provided)"
 FSTAB_LINES=$(mount_virtiofs_or_virtfs_share share /mnt/share "/mnt/share/$USER")
@@ -62,3 +81,55 @@ fi
 
 echo "4. Installing ZSH"
 DEBIAN_FRONTEND=noninteractive sudo apt install zsh -y
+
+echo "5. Setting up .config and .local"
+ZDOTDIR="$HOME/.config/zsh"
+mkdir -p ~/{.config{,/zsh},.local}
+move_and_link_dotted_files "$ZDOTDIR" zshenv zprofile zshrc zlogin zlogout
+cat <<"END" >"$ZDOTDIR/zshenv"
+ZDOTDIR="$HOME/.config/zsh"
+. $ZDOTDIR/.zshenv
+END
+if [ ! -f "$ZDOTDIR/zshrc" ]; then
+  cat <<"END" >"$ZDOTDIR/zshrc"
+autoload -Uz compinit promptinit
+compinit
+promptinit
+
+# This will set the default prompt to the walters theme
+prompt walters
+END
+fi
+
+echo "6. Installing asdf"
+ASDF_DIR="$HOME/.local/asdf"
+ASDF_CONFIG_FILE="$HOME/config/asdf/asdfrc"
+mkdir -p "$HOME/config/asdf"
+sudo apt install zlib1g-dev libyaml-dev
+
+echo "ASDF_DIR=\"$ASDF_DIR\"" >>"$ZDOTDIR/zshrc"
+echo "ASDF_CONFIG_FILE=\"$ASDF_CONFIG_FILE\"" >>"$ZDOTDIR/zshrc"
+echo "source \"$ASDF_DIR/asdf.sh\"" >>"$ZDOTDIR/zshrc"
+echo "legacy_version_file = yes" >>"$ASDF_CONFIG_FILE"
+
+. "$ASDF_DIR/asdf.sh"
+
+if [ ! -d "$ASDF_DIR" ]; then
+  git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
+  git -C "$ASDF_DIR" checkout --detach $(git -C "$ASDF_DIR" tag --list | sort -rV | head -n 1)
+fi
+# if ! grep -E "^plugins=\\([^\\)\\r\\n]*\\basdf\\b" ~/.zshrc >/dev/null; then
+#   sed -i -E "s/^(plugins=\\([^\\)\\r\\n]*)/\\1 asdf/" ~/.zshrc
+# fi
+
+asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+asdf install nodejs latest
+asdf global nodejs latest
+
+asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
+asdf install ruby latest
+asdf global ruby latest
+
+asdf plugin add yarn
+asdf install yarn latest
+asdf global yarn latest
