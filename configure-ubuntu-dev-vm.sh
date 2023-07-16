@@ -20,8 +20,8 @@ function move_and_link_dotted_files() {
   shift
   while [ $# -gt 0 ]; do
     if [ -e ".$1" ]; then
-      mv ".$1" "$CONFIG_DIR/$2"
-      ln -rs "$CONFIG_DIR/$2" "$CONFIG_DIR/.$2"
+      mv ".$1" "$CONFIG_DIR/$1"
+      ln -s "$1" "$CONFIG_DIR/.$1"
     fi
     shift
   done
