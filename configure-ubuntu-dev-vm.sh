@@ -110,7 +110,15 @@ prompt walters
 END
 fi
 
-echo "6. Installing asdf"
+echo "7. Installing startship prompt"
+cargo install starship --locked
+if file_contains_lines "$ZDOTDIR/zshrc" "eval \"\$(starship init zsh)\""; then
+  echo "eval \"\$(starship init zsh)\"" | tee -a "$ZDOTDIR/zshrc" >/dev/null
+fi
+if file_contains_lines "~/.bashrc" "eval \"\$(starship init bash)\""; then
+  echo "eval \"\$(starship init bash)\"" | tee -a "~/.bashrc" >/dev/null
+fi
+
 ASDF_DIR="$HOME/.local/asdf"
 ASDF_CONFIG_FILE="$HOME/config/asdf/asdfrc"
 mkdir -p "$HOME/config/asdf"
