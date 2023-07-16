@@ -85,14 +85,16 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install zsh -y
 echo "5. Setting up .config and .local"
 ZDOTDIR="$HOME/.config/zsh"
 ZSH_PLUGINS_DIR="$HOME/.local/zsh/plugins"
+mkdir -p "$ZDOTDIR"
 mkdir -p "$ZSH_PLUGINS_DIR"
-move_and_link_dotted_files "$ZDOTDIR" zshenv zprofile zshrc zlogin zlogout
-cat <<"END" >"$ZDOTDIR/zshenv"
+if [ ! -e "$ZDOTDIR/zshrc" ]; then
+  move_and_link_dotted_files "$ZDOTDIR" zshenv zprofile zshrc zlogin zlogout
+  cat <<"END" >"$ZDOTDIR/zshenv"
 ZDOTDIR="$HOME/.config/zsh"
 . $ZDOTDIR/.zshenv
 END
-if [ ! -f "$ZDOTDIR/zshrc" ]; then
-  cat <<"END" >"$ZDOTDIR/zshrc"
+  if [ ! -f "$ZDOTDIR/zshrc" ]; then
+    cat <<"END" >"$ZDOTDIR/zshrc"
 autoload -Uz compinit promptinit
 compinit
 promptinit
@@ -108,6 +110,7 @@ done
 # This will set the default prompt to the walters theme
 prompt walters
 END
+  fi
 fi
 
 echo "7. Installing startship prompt"
@@ -119,34 +122,42 @@ if file_contains_lines "~/.bashrc" "eval \"\$(starship init bash)\""; then
   echo "eval \"\$(starship init bash)\"" | tee -a "~/.bashrc" >/dev/null
 fi
 
+echo "8. Installing asdf"
 ASDF_DIR="$HOME/.local/asdf"
-ASDF_CONFIG_FILE="$HOME/config/asdf/asdfrc"
-mkdir -p "$HOME/config/asdf"
-sudo apt install zlib1g-dev libyaml-dev
+asdf_dir="$ASDF_DIR"
+if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
+  ASDF_CONFIG_FILE="$HOME/config/asdf/asdfrc"
+  mkdir -p "$HOME/config/asdf"
+  sudo apt install zlib1g-dev libyaml-dev
 
-echo "ASDF_DIR=\"$ASDF_DIR\"" >>"$ZDOTDIR/zshrc"
-echo "ASDF_CONFIG_FILE=\"$ASDF_CONFIG_FILE\"" >>"$ZDOTDIR/zshrc"
-echo "source \"$ASDF_DIR/asdf.sh\"" >>"$ZDOTDIR/zshrc"
-echo "legacy_version_file = yes" >>"$ASDF_CONFIG_FILE"
+  echo "ASDF_DIR=\"$ASDF_DIR\"" >>"$ZDOTDIR/zshrc"
+  echo "asdf_dir=\"\$ASDF_DIR\"" >>"$ZDOTDIR/zshrc"
+  echo "ASDF_CONFIG_FILE=\"$ASDF_CONFIG_FILE\"" >>"$ZDOTDIR/zshrc"
+  echo "source \"$ASDF_DIR/asdf.sh\"" >>"$ZDOTDIR/zshrc"
+  echo "legacy_version_file = yes" >>"$ASDF_CONFIG_FILE"
 
-. "$ASDF_DIR/asdf.sh"
+  . "$ASDF_DIR/asdf.sh"
 
-if [ ! -d "$ASDF_DIR" ]; then
-  git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
-  git -C "$ASDF_DIR" checkout --detach $(git -C "$ASDF_DIR" tag --list | sort -rV | head -n 1)
+  if [ ! -d "$ASDF_DIR" ]; then
+    git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
+    git -C "$ASDF_DIR" checkout --detach $(git -C "$ASDF_DIR" tag --list | sort -rV | head -n 1)
+  fi
+  if [ ! -d "$ZSH_PLUGINS_DIR/asdf" ]; then
+    git clone https://github.com/kiurchv/asdf.plugin.zsh.git "$ZSH_PLUGINS_DIR/asdf"
+  fi
+  if ! grep -E "^plugins=\\([^\\)\\r\\n]*\\basdf\\b" "$ZDOTDIR/zshrc" >/dev/null; then
+    sed -i -E "s/^(plugins=\\([^\\)\\r\\n]*)/\\1 asdf/" "$ZDOTDIR/zshrc"
+  fi
+
+  asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
+  asdf install nodejs latest
+  asdf global nodejs latest
+
+  asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
+  asdf install ruby latest
+  asdf global ruby latest
+
+  asdf plugin add yarn
+  asdf install yarn latest
+  asdf global yarn latest
 fi
-# if ! grep -E "^plugins=\\([^\\)\\r\\n]*\\basdf\\b" ~/.zshrc >/dev/null; then
-#   sed -i -E "s/^(plugins=\\([^\\)\\r\\n]*)/\\1 asdf/" ~/.zshrc
-# fi
-
-asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-asdf install nodejs latest
-asdf global nodejs latest
-
-asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
-asdf install ruby latest
-asdf global ruby latest
-
-asdf plugin add yarn
-asdf install yarn latest
-asdf global yarn latest
