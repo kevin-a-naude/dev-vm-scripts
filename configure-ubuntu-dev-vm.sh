@@ -89,12 +89,14 @@ mkdir -p "$ZDOTDIR"
 mkdir -p "$ZSH_PLUGINS_DIR"
 if [ ! -e "$ZDOTDIR/zshrc" ]; then
   move_and_link_dotted_files "$ZDOTDIR" zshenv zprofile zshrc zlogin zlogout
-  cat <<"END" >"$ZDOTDIR/zshenv"
+  touch "$ZDOTDIR/zshenv"
+  ln -s "zshenv" "$ZDOTDIR./zshenv"
+  cat <<"END" >"~/.zshenv"
 ZDOTDIR="$HOME/.config/zsh"
 . $ZDOTDIR/.zshenv
 END
   if [ ! -f "$ZDOTDIR/zshrc" ]; then
-    cat <<"END" >"$ZDOTDIR/zshrc"
+    cat <<END >"$ZDOTDIR/zshrc"
 autoload -Uz compinit promptinit
 compinit
 promptinit
@@ -103,8 +105,8 @@ promptinit
 plugins=()
 
 # Source selected plugins
-for index in {1..$#plugins}; do
-  . "$ZSH_PLUGINS_DIR/$plugins[index]/$plugins[index].plugin.zsh"
+for index in {1..\$#plugins}; do
+  . "$ZSH_PLUGINS_DIR/\$plugins[index]/\$plugins[index].plugin.zsh"
 done
 
 # This will set the default prompt to the walters theme
@@ -136,8 +138,6 @@ if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
   echo "source \"$ASDF_DIR/asdf.sh\"" >>"$ZDOTDIR/zshrc"
   echo "legacy_version_file = yes" >>"$ASDF_CONFIG_FILE"
 
-  . "$ASDF_DIR/asdf.sh"
-
   if [ ! -d "$ASDF_DIR" ]; then
     git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
     git -C "$ASDF_DIR" checkout --detach $(git -C "$ASDF_DIR" tag --list | sort -rV | head -n 1)
@@ -147,17 +147,12 @@ if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
   fi
   if ! grep -E "^plugins=\\([^\\)\\r\\n]*\\basdf\\b" "$ZDOTDIR/zshrc" >/dev/null; then
     sed -i -E "s/^(plugins=\\([^\\)\\r\\n]*)/\\1 asdf/" "$ZDOTDIR/zshrc"
+    sed -i -E "s/^(plugins=\\()\\s+/\\1/" "$ZDOTDIR/zshrc"
   fi
 
-  asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git
-  asdf install nodejs latest
-  asdf global nodejs latest
+  zsh -c "asdf plugin add nodejs https://github.com/asdf-vm/asdf-nodejs.git && asdf install nodejs latest && asdf global nodejs latest"
 
-  asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git
-  asdf install ruby latest
-  asdf global ruby latest
+  zsh -c "asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git && asdf install ruby latest && asdf global ruby latest"
 
-  asdf plugin add yarn
-  asdf install yarn latest
-  asdf global yarn latest
+  zsh -c "asdf plugin add yarn && asdf install yarn latest && asdf global yarn latest"
 fi
