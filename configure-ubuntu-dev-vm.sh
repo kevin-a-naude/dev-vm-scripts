@@ -128,8 +128,8 @@ echo "8. Installing asdf"
 ASDF_DIR="$HOME/.local/asdf"
 asdf_dir="$ASDF_DIR"
 if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
-  ASDF_CONFIG_FILE="$HOME/config/asdf/asdfrc"
-  mkdir -p "$HOME/config/asdf"
+  ASDF_CONFIG_FILE="$HOME/.config/asdf/asdfrc"
+  mkdir -p "$HOME/.config/asdf"
   sudo apt install zlib1g-dev libyaml-dev
 
   echo "ASDF_DIR=\"$ASDF_DIR\"" >>"$ZDOTDIR/zshrc"
