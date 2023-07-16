@@ -84,7 +84,8 @@ DEBIAN_FRONTEND=noninteractive sudo apt-get install zsh -y
 
 echo "5. Setting up .config and .local"
 ZDOTDIR="$HOME/.config/zsh"
-mkdir -p ~/{.config{,/zsh},.local}
+ZSH_PLUGINS_DIR="$HOME/.local/zsh/plugins"
+mkdir -p "$ZSH_PLUGINS_DIR"
 move_and_link_dotted_files "$ZDOTDIR" zshenv zprofile zshrc zlogin zlogout
 cat <<"END" >"$ZDOTDIR/zshenv"
 ZDOTDIR="$HOME/.config/zsh"
@@ -95,6 +96,14 @@ if [ ! -f "$ZDOTDIR/zshrc" ]; then
 autoload -Uz compinit promptinit
 compinit
 promptinit
+
+# Selected plugins
+plugins=()
+
+# Source selected plugins
+for index in {1..$#plugins}; do
+  . "$ZSH_PLUGINS_DIR/$plugins[index]/$plugins[index].plugin.zsh"
+done
 
 # This will set the default prompt to the walters theme
 prompt walters
