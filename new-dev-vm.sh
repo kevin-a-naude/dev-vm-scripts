@@ -136,3 +136,5 @@ cargo install starship --locked
 
 heading "Tips"
 echo " - change your default shell: \`chsh -s $(which zsh)\`"
+echo " - set up your SSH keys"
+echo " - set up you GPG keys"
