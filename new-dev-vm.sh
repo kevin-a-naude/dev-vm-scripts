@@ -5,7 +5,7 @@ echo "Script is located in $BASE"
 
 # heading <text>
 function heading() {
-  echo "$1"
+  echo "--- $1"
   echo "============================================================="
 }
 
@@ -81,6 +81,26 @@ function mount_virtiofs_or_virtfs_share() {
   mount_virtfs_share "$1" "$3"
 }
 
+# install_fonts <font-name>...
+function install_fonts() {
+  local version='3.0.2'
+  local fonts_dir="${HOME}/.local/share/fonts"
+
+  mkdir -p "$fonts_dir"
+  while [ $# -gt 0 ]; do
+    local font="$1"
+    local zip_file="${font}.zip"
+    local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${zip_file}"
+    wget "$download_url"
+    unzip "$zip_file" -d "$fonts_dir" -x "*.txt/*" -x "*.md/*"
+    rm "$zip_file"
+    shift
+  done
+  find "$fonts_dir" -name '*Windows Compatible*' -delete
+
+  fc-cache -fv
+}
+
 
 heading "Updating OS"
 DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y
@@ -108,7 +128,7 @@ export ASDF_DIR="$HOME/.local/asdf"
 export asdf_dir="$ASDF_DIR"
 export ASDF_DATA_DIR="$ASDF_DIR/data"
 if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
-  sudo apt install zlib1g-dev libyaml-dev
+  sudo apt-get install zlib1g-dev libyaml-dev
 
   if [ ! -d "$ASDF_DIR" ]; then
     git clone https://github.com/asdf-vm/asdf.git "$ASDF_DIR"
@@ -151,8 +171,52 @@ heading "Installing startship prompt"
 cargo install starship --locked
 completed
 
+heading "Install docker"
+CODENAME=$(lsb_release -cs)
+ARCH=$(dpkg --print-architecture)
+
+DEBIAN_FRONTEND=noninteractive sudo apt-get install ca-certificates -y
+
+sudo install -m 0755 -d /etc/apt/keyrings
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+sudo chmod a+r /etc/apt/keyrings/docker.gpg
+
+echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | \
+  sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+
+sudo apt update
+sudo group add docker
+DEBIAN_FRONTEND=noninteractive sudo apt-get install docker-ce docker-ce-cli -y
+sudo usermod -aG docker ${USER}
+completed
+
+heading "Install desktop"
+sudo apt install gdm3 ubuntu-desktop^
+completed
+
+heading "Install some nerd fonts"
+install_fonts CascadiaCode ComicShannsMono FantasqueSansMono FiraCode Noto OpenDyslexic VictorMono
+completed
+
+heading "Install Visual Studio Code"
+CODENAME=$(lsb_release -cs)
+ARCH=$(dpkg --print-architecture)
+
+curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
+sudo chmod a+r /etc/apt/keyrings/packages.microsoft.gpg
+
+echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
+  sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+
+sudo apt-get install apt-transport-https
+sudo apt update
+sudo apt-get install code # or code-insiders
+completed
+
 heading "Tips"
-echo " - change your default shell: \`chsh -s $(which zsh)\`"
+echo " - log out and back in to see some changes"
+echo " - allow a user to run docker commands: e.g. \`sudo usermod -aG docker \${USER}\`"
+echo " - change your default shell: e.g. \`chsh -s $(which zsh)\`"
 echo " - set up your SSH keys"
 echo " - set up you GPG keys"
 completed
