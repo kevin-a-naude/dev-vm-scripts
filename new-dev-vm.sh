@@ -6,7 +6,7 @@ echo "Script is located in $BASE"
 # heading <text>
 function heading() {
   echo "$1"
-  echo "-------------------------------------------------------------"
+  echo "============================================================="
 }
 
 function completed() {
