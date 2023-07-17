@@ -49,7 +49,7 @@ function mount_virtiofs_share() {
   local SHARE="$1"
   local MOUNT_PATH="$2"
   sudo mkdir -p "$MOUNT_PATH" && \
-  sudo mount -t virtiofs "$SHARE" "$MOUNT_PATH" >/dev/null 2>&1 && \
+  sudo mount -t virtiofs "$SHARE" "$MOUNT_PATH" && \
   cat <<END
 $SHARE	$MOUNT_PATH	virtiofs	rw,nofail	0	0
 END
@@ -63,7 +63,7 @@ function mount_virtfs_share() {
   local SHARE="$1"
   local MOUNT_PATH="$2"
   sudo mkdir -p "$MOUNT_PATH" && \
-  sudo mount -t 9p -o trans=virtio "$SHARE" "$MOUNT_PATH" -oversion=9p2000.L >/dev/null 2>&1 && (\
+  sudo mount -t 9p -o trans=virtio "$SHARE" "$MOUNT_PATH" -oversion=9p2000.L && (\
     MAPPING="$(stat -c '%u' "$MOUNT_PATH")/$(stat -c '%u' "$HOME"):@$(stat -c '%g' "$MOUNT_PATH")/@$(stat -c '%g' "$HOME")"
     sudo bindfs "--map=$MAPPING" "$MOUNT_PATH" "$MOUNT_PATH" && \
     cat <<END
@@ -92,7 +92,7 @@ function install_fonts() {
     local zip_file="${font}.zip"
     local download_url="https://github.com/ryanoasis/nerd-fonts/releases/download/v${version}/${zip_file}"
     wget "$download_url"
-    unzip "$zip_file" -d "$fonts_dir" -x "*.txt/*" -x "*.md/*"
+    unzip "$zip_file" -d "$fonts_dir" -x "*.txt" -x "*.md"
     rm "$zip_file"
     shift
   done
@@ -113,7 +113,7 @@ completed
 heading "Mounting share (if provided)"
 FSTAB_LINES=$(mount_virtiofs_or_virtfs_share share /mnt/share "/mnt/share/$USER")
 if [ ! -z "$FSTAB_LINES" ] && ! file_contains_lines /etc/fstab "$FSTAB_LINES"; then
-  echo "$FSTAB_LINES" | sudo tee -a /etc/fstab >/dev/null
+  echo "$FSTAB_LINES" | sudo tee -a /etc/fstab
 fi
 completed
 
@@ -180,7 +180,7 @@ if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
   sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
   echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | \
-    sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+    sudo tee /etc/apt/sources.list.d/docker.list
 
   sudo apt update
   sudo group add docker
@@ -208,7 +208,7 @@ if [ ! -f /etc/apt/keyrings/packages.microsoft.gpg ]; then
   sudo chmod a+r /etc/apt/keyrings/packages.microsoft.gpg
 
   echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
-    sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+    sudo tee /etc/apt/sources.list.d/vscode.list
 
   DEBIAN_FRONTEND=noninteractive sudo apt-get install apt-transport-https -y
   sudo apt update
