@@ -2,7 +2,7 @@ autoload -Uz compinit promptinit
 compinit
 promptinit
 
-path=("$HOME/.cargo/bin" path)
+path+=("$HOME/.cargo/bin")
 
 # Selected plugins
 plugins=(asdf zsh-autosuggestions zsh-syntax-highlighting)
