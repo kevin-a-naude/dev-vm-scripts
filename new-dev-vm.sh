@@ -141,6 +141,12 @@ if [ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ]; then
 fi
 completed
 
+heading "Configure bash"
+if ! file_contains_lines "~/.bashrc" ". ~/.config/bash/bashrc"; then
+  echo ". ~/.config/bash/bashrc" | tee -a "~/.bashrc" >/dev/null
+fi
+completed
+
 heading "Installing startship prompt"
 cargo install starship --locked
 completed
