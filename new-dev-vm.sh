@@ -10,6 +10,7 @@ function heading() {
 }
 
 function completed() {
+  echo "Done."
   echo "-------------------------------------------------------------"
   echo ""
 }

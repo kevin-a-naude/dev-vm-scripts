@@ -8,7 +8,7 @@ path+=("$HOME/.cargo/bin")
 plugins=(asdf zsh-autosuggestions zsh-syntax-highlighting)
 
 # Source selected plugins
-for index in {1..\$#plugins}; do
+for index in {1..$#plugins}; do
   . "$ZSH_PLUGINS_DIR/$plugins[index]/$plugins[index].plugin.zsh"
 done
 
