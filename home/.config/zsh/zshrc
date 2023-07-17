@@ -1,6 +1,7 @@
-autoload -Uz compinit promptinit
+autoload -Uz compinit promptinit bashcompinit
 compinit
 promptinit
+bashcompinit
 
 path+=("$HOME/.cargo/bin")
 
