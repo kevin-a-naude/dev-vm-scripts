@@ -144,9 +144,6 @@ completed
 
 heading "Installing zsh"
 DEBIAN_FRONTEND=noninteractive sudo apt-get install zsh -y
-if [ ! -e "~/.config/zsh/.zshrc" ]; then
-  ln -s zshrc "~/.config/zsh/.zshrc"
-fi
 
 ZSH_PLUGINS_DIR="$HOME/.local/zsh/plugins"
 mkdir -p "$ZSH_PLUGINS_DIR"
@@ -162,8 +159,8 @@ fi
 completed
 
 heading "Configure bash"
-if ! file_contains_lines "~/.bashrc" ". ~/.config/bash/bashrc"; then
-  echo ". ~/.config/bash/bashrc" | tee -a "~/.bashrc" >/dev/null
+if [ ! -f "~/.bashrc" ] || ! file_contains_lines "~/.bashrc" ". ~/.config/bash/bashrc"; then
+  echo ". ~/.config/bash/bashrc" | tee -a "$HOME/.bashrc" >/dev/null
 fi
 completed
 
@@ -172,45 +169,51 @@ cargo install starship --locked
 completed
 
 heading "Install docker"
-CODENAME=$(lsb_release -cs)
-ARCH=$(dpkg --print-architecture)
+if [ ! -f /etc/apt/keyrings/docker.gpg ]; then
+  CODENAME=$(lsb_release -cs)
+  ARCH=$(dpkg --print-architecture)
 
-DEBIAN_FRONTEND=noninteractive sudo apt-get install ca-certificates -y
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install ca-certificates -y
 
-sudo install -m 0755 -d /etc/apt/keyrings
-curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-sudo chmod a+r /etc/apt/keyrings/docker.gpg
+  sudo install -m 0755 -d /etc/apt/keyrings
+  curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+  sudo chmod a+r /etc/apt/keyrings/docker.gpg
 
-echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | \
-  sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
+  echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu $CODENAME stable" | \
+    sudo tee /etc/apt/sources.list.d/docker.list >/dev/null
 
-sudo apt update
-sudo group add docker
-DEBIAN_FRONTEND=noninteractive sudo apt-get install docker-ce docker-ce-cli -y
-sudo usermod -aG docker ${USER}
+  sudo apt update
+  sudo group add docker
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install docker-ce docker-ce-cli -y
+  sudo usermod -aG docker ${USER}
+fi
 completed
 
 heading "Install desktop"
-sudo apt install gdm3 ubuntu-desktop^
+DEBIAN_FRONTEND=noninteractive sudo apt install gdm3 ubuntu-desktop^ -y
 completed
 
 heading "Install some nerd fonts"
-install_fonts CascadiaCode ComicShannsMono FantasqueSansMono FiraCode Noto OpenDyslexic VictorMono
+if [ ! -d ~/.local/share/fonts ]; then
+  install_fonts CascadiaCode ComicShannsMono FantasqueSansMono FiraCode Noto OpenDyslexic VictorMono
+fi
 completed
 
 heading "Install Visual Studio Code"
-CODENAME=$(lsb_release -cs)
-ARCH=$(dpkg --print-architecture)
+if [ ! -f /etc/apt/keyrings/packages.microsoft.gpg ]; then
+  CODENAME=$(lsb_release -cs)
+  ARCH=$(dpkg --print-architecture)
 
-curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
-sudo chmod a+r /etc/apt/keyrings/packages.microsoft.gpg
+  curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /etc/apt/keyrings/packages.microsoft.gpg
+  sudo chmod a+r /etc/apt/keyrings/packages.microsoft.gpg
 
-echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
-  sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
+  echo "deb [arch=$ARCH signed-by=/etc/apt/keyrings/packages.microsoft.gpg] https://packages.microsoft.com/repos/code stable main" | \
+    sudo tee /etc/apt/sources.list.d/vscode.list >/dev/null
 
-sudo apt-get install apt-transport-https
-sudo apt update
-sudo apt-get install code # or code-insiders
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install apt-transport-https -y
+  sudo apt update
+  DEBIAN_FRONTEND=noninteractive sudo apt-get install code -y # or code-insiders
+fi
 completed
 
 heading "Tips"
