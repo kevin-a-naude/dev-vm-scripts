@@ -5,8 +5,13 @@ echo "Script is located in $BASE"
 
 # heading <text>
 function heading() {
+  echo "-------------------------------------------------------------"
   echo "$1"
-  echo "--------------------------------------------------------"
+  echo "---------------------------- *** ----------------------------"
+}
+
+function completed() {
+  echo ""
 }
 
 # is_mounted <path>
@@ -78,20 +83,24 @@ function mount_virtiofs_or_virtfs_share() {
 
 heading "Updating OS"
 DEBIAN_FRONTEND=noninteractive sudo apt update && DEBIAN_FRONTEND=noninteractive sudo apt full-upgrade -y
+completed
 
 heading "Installing essential tools"
-DEBIAN_FRONTEND=noninteractive sudo apt-get install git curl wget grep sed gnupg gpg bindfs build-essential cargo nano micro apt-utils -y
+DEBIAN_FRONTEND=noninteractive sudo apt-get install git curl wget grep sed gnupg gpg bindfs build-essential cmake cargo nano micro apt-utils -y
+completed
 
 heading "Mounting share (if provided)"
 FSTAB_LINES=$(mount_virtiofs_or_virtfs_share share /mnt/share "/mnt/share/$USER")
 if [ ! -z "$FSTAB_LINES" ] && ! file_contains_lines /etc/fstab "$FSTAB_LINES"; then
   echo "$FSTAB_LINES" | sudo tee -a /etc/fstab >/dev/null
 fi
+completed
 
 heading "Setting up initial config"
 if [ ! -d ~/.config/zsh ]; then
   cp -R "$BASE/home/*" "$HOME/"
 fi
+completed
 
 heading "Installing asdf"
 ASDF_DIR="$HOME/.local/asdf"
@@ -112,6 +121,7 @@ fi
 if ! file_contains_lines "~/.bashrc" ". ~/.config/bash/bashrc"; then
   echo ". ~/.config/bash/bashrc" | tee -a "~/.bashrc" >/dev/null
 fi
+completed
 
 heading "Installing zsh"
 DEBIAN_FRONTEND=noninteractive sudo apt-get install zsh -y
@@ -130,11 +140,14 @@ fi
 if [ ! -d "$ZSH_PLUGINS_DIR/zsh-autosuggestions" ]; then
   git clone https://github.com/zsh-users/zsh-autosuggestions.git "$ZSH_PLUGINS_DIR/zsh-autosuggestions"
 fi
+completed
 
 heading "Installing startship prompt"
 cargo install starship --locked
+completed
 
 heading "Tips"
 echo " - change your default shell: \`chsh -s $(which zsh)\`"
 echo " - set up your SSH keys"
 echo " - set up you GPG keys"
+completed
