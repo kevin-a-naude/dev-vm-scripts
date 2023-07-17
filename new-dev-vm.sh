@@ -98,7 +98,7 @@ completed
 
 heading "Setting up initial config"
 if [ ! -d ~/.config/zsh ]; then
-  cp -R "$BASE/home/*" "$HOME/"
+  cp -R "$BASE/home/." "$HOME/"
 fi
 completed
 
