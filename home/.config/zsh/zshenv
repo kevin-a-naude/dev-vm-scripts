@@ -1,0 +1,4 @@
+ZSH_PLUGINS_DIR="$HOME/.local/zsh/plugins"
+ASDF_DIR="$HOME/.local/asdf"
+asdf_dir="$ASDF_DIR"
+ASDF_CONFIG_FILE="$HOME/.config/asdf/asdfrc"

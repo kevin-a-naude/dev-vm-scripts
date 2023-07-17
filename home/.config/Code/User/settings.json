@@ -1,0 +1,9 @@
+{
+    "telemetry.telemetryLevel": "off",
+    "editor.autoClosingDelete": "never",
+    "editor.autoClosingBrackets": "beforeWhitespace",
+    "editor.autoClosingQuotes": "beforeWhitespace",
+    "editor.find.autoFindInSelection": "multiline",
+    "editor.fontFamily": "'Fira Code'",
+    "editor.fontLigatures": true
+}

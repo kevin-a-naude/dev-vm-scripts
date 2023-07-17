@@ -1,0 +1,19 @@
+autoload -Uz compinit promptinit
+compinit
+promptinit
+
+# Selected plugins
+plugins=(asdf zsh-autosuggestions zsh-syntax-highlighting)
+
+# Source selected plugins
+for index in {1..\$#plugins}; do
+  . "$ZSH_PLUGINS_DIR/$plugins[index]/$plugins[index].plugin.zsh"
+done
+
+source "$ASDF_DIR/asdf.sh"
+
+# This will set the default prompt to the walters theme
+# prompt walters
+
+# This will enable the starship prompt
+eval "$(starship init zsh)"
