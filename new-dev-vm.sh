@@ -118,9 +118,6 @@ if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
   asdf plugin add ruby https://github.com/asdf-vm/asdf-ruby.git && asdf install ruby latest && asdf global ruby latest
   asdf plugin add yarn && asdf install yarn latest && asdf global yarn latest
 fi
-if ! file_contains_lines "~/.bashrc" ". ~/.config/bash/bashrc"; then
-  echo ". ~/.config/bash/bashrc" | tee -a "~/.bashrc" >/dev/null
-fi
 completed
 
 heading "Installing zsh"
