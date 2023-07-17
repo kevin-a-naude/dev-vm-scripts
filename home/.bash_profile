@@ -1,2 +1,1 @@
-BASHDOTDIR="$HOME/.config/bash"
-. $BASHDOTDIR/bash_profile
+. ~/.config/bash/bash_profile
