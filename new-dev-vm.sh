@@ -103,9 +103,9 @@ fi
 completed
 
 heading "Installing asdf"
-ASDF_DIR="$HOME/.local/asdf"
-asdf_dir="$ASDF_DIR"
-ASDF_DATA_DIR="$ASDF_DIR/data"
+export ASDF_DIR="$HOME/.local/asdf"
+export asdf_dir="$ASDF_DIR"
+export ASDF_DATA_DIR="$ASDF_DIR/data"
 if [ ! -e "$ASDF_DIR/asdf.sh" ]; then
   sudo apt install zlib1g-dev libyaml-dev
 
