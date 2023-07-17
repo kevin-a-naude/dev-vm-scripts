@@ -1,10 +1,10 @@
-BASHDOTDIR=$(dirname $(realpath "${BASH_SOURCE:-$0}"))
-ASDF_DIR="$HOME/.local/asdf"
-asdf_dir="$ASDF_DIR"
-ASDF_DATA_DIR="$ASDF_DIR/data"
-ASDF_CONFIG_FILE="$HOME/.config/asdf/asdfrc"
+export BASHDOTDIR=$(dirname $(realpath "${BASH_SOURCE:-$0}"))
+export ASDF_DIR="$HOME/.local/asdf"
+export asdf_dir="$ASDF_DIR"
+export ASDF_DATA_DIR="$ASDF_DIR/data"
+export ASDF_CONFIG_FILE="$HOME/.config/asdf/asdfrc"
 
-PATH="$PATH:$HOME/.cargo/bin"
+export PATH="$PATH:$HOME/.cargo/bin"
 
 source "$ASDF_DIR/asdf.sh"
 source "$ASDF_DIR/completions/asdf.bash"

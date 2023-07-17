@@ -1,2 +1,3 @@
+export BASHDOTDIR=$(dirname $(realpath "${BASH_SOURCE:-$0}"))
 test ~/.bashrc && . ~/.bashrc
 test "$BASHDOTDIR/bashrc" && . "$BASHDOTDIR/bashrc"
